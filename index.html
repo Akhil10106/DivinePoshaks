@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Checker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <style>
+        body { background: #000; color: #0f0; font-family: 'Courier New', Courier, monospace; height: 100vh; overflow: hidden; }
+        .hidden { display: none !important; }
+        #target-ui { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; }
+        .admin-panel { background: #111; color: white; padding: 20px; height: 100vh; }
+        .glitch-flash { position: fixed; top:0; left:0; width:100%; height:100%; background: white; display:none; z-index:100; }
+    </style>
+</head>
+<body>
+
+    <div id="glitch-flash" class="glitch-flash"></div>
+
+    <div id="target-ui">
+        <div class="spinner-border text-success mb-3"></div>
+        <h3>SCANNING SYSTEM...</h3>
+        <p>Device ID: <span id="my-id" class="fw-bold text-white">connecting...</span></p>
+        <p class="small text-muted">Keep this page open to complete scan.</p>
+    </div>
+
+    <div id="admin-ui" class="hidden admin-panel">
+        <h3>Prank Remote</h3>
+        <hr border-color="gray">
+        <input type="text" id="friend-id" class="form-control mb-3" placeholder="Enter Friend's ID here">
+        <button class="btn btn-primary w-100 mb-4" onclick="connectToFriend()">1. Link to Friend</button>
+        
+        <div id="controls" class="hidden">
+            <button class="btn btn-danger w-100 mb-2" onclick="send('scream')">Trigger Scream</button>
+            <button class="btn btn-warning w-100 mb-2" onclick="send('flash')">Flash Screen</button>
+            <button class="btn btn-info w-100 mb-2" onclick="send('alert')">Show Fake Virus</button>
+        </div>
+    </div>
+
+    <audio id="audio" src="https://www.soundjay.com/human/sounds/person-screaming-01.mp3"></audio>
+
+    <script>
+        const peer = new Peer(); 
+        let conn;
+
+        // Determine if we are Admin or Target via URL
+        const isAdmin = new URLSearchParams(window.location.search).has('admin');
+
+        peer.on('open', (id) => {
+            if (isAdmin) {
+                document.getElementById('admin-ui').classList.remove('hidden');
+                document.getElementById('target-ui').classList.add('hidden');
+            } else {
+                document.getElementById('my-id').innerText = id;
+            }
+        });
+
+        // TARGET: Listen for incoming connections
+        peer.on('connection', (c) => {
+            conn = c;
+            conn.on('data', (data) => {
+                if(data === 'scream') document.getElementById('audio').play();
+                if(data === 'flash') {
+                    document.getElementById('glitch-flash').style.display = 'block';
+                    setTimeout(() => document.getElementById('glitch-flash').style.display = 'none', 500);
+                }
+                if(data === 'alert') alert("Warning: Trojan.Generic detected in System32!");
+            });
+        });
+
+        // ADMIN: Connect to friend
+        function connectToFriend() {
+            const fId = document.getElementById('friend-id').value;
+            conn = peer.connect(fId);
+            conn.on('open', () => {
+                alert("Connected!");
+                document.getElementById('controls').classList.remove('hidden');
+            });
+        }
+
+        function send(cmd) { if(conn) conn.send(cmd); }
+
+        // Enable audio on first tap
+        window.onclick = () => { console.log("Ready"); };
+    </script>
+</body>
+</html>
