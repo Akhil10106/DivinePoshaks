@@ -40,8 +40,12 @@
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             animation: textShimmer 4s linear infinite, floatY 6s ease-in-out infinite;
         }
-        @keyframes textShimmer { to { background-position: 200% center; } }
-        @keyframes floatY { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+        /* --- LUXE SEARCH BAR --- */
+        .search-container { max-width: 600px; margin: 0 auto 20px; position: relative; }
+        .luxe-search { background: white; border: 1px solid rgba(0,0,0,0.05); padding: 15px 25px 15px 50px; border-radius: 20px; width: 100%; font-weight: 600; font-size: 0.95rem; box-shadow: 0 10px 30px rgba(0,0,0,0.02); transition: 0.4s; outline: none; }
+        .luxe-search:focus { box-shadow: 0 15px 40px var(--accent-soft); border-color: var(--accent); }
+        .search-icon { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); color: var(--accent); font-size: 1.2rem; }
 
         .cal-container { background: white; border-radius: 40px; padding: 35px; box-shadow: 0 30px 70px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.02); max-width: 500px; margin: 0 auto; }
         .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
@@ -51,11 +55,7 @@
         
         .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; text-align: center; }
         .cal-day-label { font-size: 0.7rem; font-weight: 800; color: #BBB; padding-bottom: 10px; }
-        .cal-date { 
-            aspect-ratio: 1; display: flex; align-items: center; justify-content: center; 
-            font-size: 0.95rem; font-weight: 700; border-radius: 16px; cursor: pointer; 
-            transition: 0.3s; border: 1px solid transparent; position: relative;
-        }
+        .cal-date { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 0.95rem; font-weight: 700; border-radius: 16px; cursor: pointer; transition: 0.3s; border: 1px solid transparent; position: relative; }
         .cal-date:hover { background: var(--accent-soft); color: var(--accent); }
         .cal-date.today { background: var(--accent); color: white; box-shadow: 0 10px 20px var(--accent-soft); }
         .cal-date.sacred { background: #FFF0F0; color: #FF4757; border-color: #FFE0E0; }
@@ -74,6 +74,7 @@
         .img-wrap { aspect-ratio: 1 / 1.15; overflow: hidden; background: #f0f2f5; }
         .img-wrap img { width: 100%; height: 100%; object-fit: cover; }
         .price-tag { position: absolute; bottom: 15px; right: 15px; background: rgba(255,255,255,0.92); backdrop-filter: blur(10px); color: var(--accent); padding: 5px 12px; border-radius: 12px; font-weight: 800; font-size: 0.8rem; }
+        .color-badge { position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.8); color: #444; padding: 2px 8px; border-radius: 6px; font-size: 0.6rem; font-weight: 700; z-index: 5; }
         .luxe-id-tag { position: absolute; top: 15px; left: 15px; background: rgba(0,0,0,0.6); color: white; padding: 2px 8px; border-radius: 6px; font-size: 0.6rem; font-weight: 700; z-index: 5; }
 
         .action-hub { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--glass); backdrop-filter: blur(25px); padding: 10px 25px; border-radius: 100px; display: flex; gap: 15px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); z-index: 1000; border: 1px solid rgba(255,255,255,0.5); }
@@ -82,6 +83,8 @@
 
         .hidden { display: none !important; }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes textShimmer { to { background-position: 200% center; } }
+        @keyframes floatY { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
     </style>
 </head>
 <body>
@@ -109,6 +112,11 @@
             </div>
             <p id="timeGreeting" class="greet-text">Radhe Radhe!</p>
             <h1 id="userGreeting" class="user-name-shimmer">Divine Collections.</h1>
+            
+            <div class="search-container mt-4 animate__animated animate__fadeInUp">
+                <i class="bi bi-search search-icon"></i>
+                <input type="text" id="mainSearch" class="luxe-search" placeholder="Search by Name, Color or Luxe-ID (e.g. L-A1B2)..." oninput="handleSearch()">
+            </div>
         </header>
         <div id="gallery" class="row g-3 g-md-4"></div>
     </main>
@@ -139,13 +147,17 @@
 
     <main id="sectionAdmin" class="section-container container hidden py-4 mb-5">
         <div class="bg-white p-4 rounded-5 mb-3 shadow-sm" onclick="toggleCollapse('adminAddForm')">
-            <h5 class="fw-900 mb-0">Add Product <i class="bi bi-chevron-down float-end"></i></h5>
+            <h5 class="fw-900 mb-0" id="adminFormTitle">Add Product <i class="bi bi-chevron-down float-end"></i></h5>
             <div id="adminAddForm" class="mt-4 hidden" onclick="event.stopPropagation()">
                 <div class="row g-2">
+                    <input type="hidden" id="editProductId">
                     <input type="file" id="pImg" class="form-control mb-2 rounded-4">
-                    <input type="text" id="pName" class="form-control mb-2 rounded-4" placeholder="Name">
-                    <input type="number" id="pPrice" class="form-control mb-2 rounded-4" placeholder="Price">
+                    <input type="text" id="pName" class="form-control mb-2 rounded-4" placeholder="Product Name">
+                    <input type="number" id="pPrice" class="form-control mb-2 rounded-4" placeholder="Price (₹)">
+                    <input type="text" id="pColor" class="form-control mb-2 rounded-4" placeholder="Product Color (e.g. Saffron)">
+                    <input type="text" id="pSize" class="form-control mb-2 rounded-4" placeholder="Product Size (e.g. 0, 1, 2)">
                     <button id="uploadBtn" class="btn btn-dark w-100 rounded-pill py-3 fw-800">PUBLISH</button>
+                    <button id="cancelEditBtn" class="btn btn-light w-100 rounded-pill py-2 fw-800 mt-2 hidden" onclick="resetAdminForm()">CANCEL EDIT</button>
                 </div>
             </div>
         </div>
@@ -213,8 +225,12 @@
         const adminEmail = "akhilgoel985@gmail.com";
         const whatsappNumber = "917206279351";
 
-        window.openWhatsApp = (name, price) => {
-            const msg = encodeURIComponent(`Radhe Radhe! I'm interested in:\n✨ Poshak: ${name}\n💰 Price: ₹${price}`);
+        // Global product storage for search
+        let currentProducts = [];
+
+        window.openWhatsApp = (name, price, color, size, id) => {
+            const luxeId = id.slice(-4).toUpperCase();
+            const msg = encodeURIComponent(`Radhe Radhe! I'm interested in:\n\n✨ Poshak: ${name}\n🆔 ID: L-${luxeId}\n💰 Price: ₹${price}\n🎨 Color: ${color || 'Standard'}\n📏 Size: ${size || 'N/A'}`);
             window.open(`https://wa.me/${whatsappNumber}?text=${msg}`, '_blank');
         };
 
@@ -237,31 +253,86 @@
         }
         runTimer();
 
-        // FIXED PUBLISHING LOGIC
+        window.editProduct = (id) => {
+            onValue(ref(db, `products/${id}`), (snap) => {
+                const p = snap.val();
+                if(p) {
+                    document.getElementById('adminFormTitle').innerHTML = `Edit Product: ${p.name} <i class="bi bi-chevron-down float-end"></i>`;
+                    document.getElementById('editProductId').value = id;
+                    document.getElementById('pName').value = p.name;
+                    document.getElementById('pPrice').value = p.price;
+                    document.getElementById('pColor').value = p.color || "";
+                    document.getElementById('pSize').value = p.size || "";
+                    document.getElementById('uploadBtn').innerText = "UPDATE PRODUCT";
+                    document.getElementById('cancelEditBtn').classList.remove('hidden');
+                    document.getElementById('adminAddForm').classList.remove('hidden');
+                    window.scrollTo(0,0);
+                }
+            }, { onlyOnce: true });
+        };
+
+        window.resetAdminForm = () => {
+            document.getElementById('adminFormTitle').innerHTML = `Add Product <i class="bi bi-chevron-down float-end"></i>`;
+            document.getElementById('editProductId').value = '';
+            document.getElementById('pName').value = '';
+            document.getElementById('pPrice').value = '';
+            document.getElementById('pColor').value = '';
+            document.getElementById('pSize').value = '';
+            document.getElementById('pImg').value = '';
+            document.getElementById('uploadBtn').innerText = "PUBLISH";
+            document.getElementById('cancelEditBtn').classList.add('hidden');
+        };
+
         document.getElementById('uploadBtn').onclick = () => {
             const file = document.getElementById('pImg').files[0];
             const name = document.getElementById('pName').value;
             const price = document.getElementById('pPrice').value;
-
-            if (!file || !name || !price) return alert("Please fill all details and select an image.");
-
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => {
-                push(ref(db, 'products'), { name, price, url: reader.result })
-                .then(() => {
-                    alert("Poshak Published Successfully!");
-                    document.getElementById('pName').value = '';
-                    document.getElementById('pPrice').value = '';
-                    document.getElementById('pImg').value = '';
-                })
-                .catch(err => alert("Error: " + err.message));
+            const color = document.getElementById('pColor').value;
+            const size = document.getElementById('pSize').value;
+            const editId = document.getElementById('editProductId').value;
+            if (!name || !price) return alert("Fill Name and Price.");
+            const process = (imgUrl = null) => {
+                const d = { name, price, color, size };
+                if(imgUrl) d.url = imgUrl;
+                if(editId) update(ref(db, `products/${editId}`), d).then(() => resetAdminForm());
+                else push(ref(db, 'products'), d).then(() => resetAdminForm());
             };
+            if (file) { const r = new FileReader(); r.readAsDataURL(file); r.onload = () => process(r.result); }
+            else process();
         };
 
-        window.deleteProduct = (id) => {
-            if(confirm("Remove this Poshak from Boutique?")) remove(ref(db, `products/${id}`));
+        window.deleteProduct = (id) => { if(confirm("Remove Poshak?")) remove(ref(db, `products/${id}`)); };
+
+        window.handleSearch = () => {
+            const term = document.getElementById('mainSearch').value.toLowerCase();
+            renderGallery(currentProducts.filter(p => 
+                p.name.toLowerCase().includes(term) || 
+                (p.color && p.color.toLowerCase().includes(term)) || 
+                (p.size && p.size.toLowerCase().includes(term)) ||
+                `l-${p.id.slice(-4).toUpperCase()}`.toLowerCase().includes(term)
+            ));
         };
+
+        function renderGallery(products) {
+            const gallery = document.getElementById('gallery');
+            gallery.innerHTML = '';
+            products.forEach(p => {
+                const luxeId = p.id.slice(-4).toUpperCase();
+                gallery.innerHTML += `
+                    <div class="col-6 col-md-4 col-lg-3">
+                        <div class="poshak-card shadow-sm visible" onclick="openWhatsApp('${p.name}', '${p.price}', '${p.color}', '${p.size}', '${p.id}')">
+                            <span class="luxe-id-tag">L-${luxeId}</span>
+                            ${p.color ? `<span class="color-badge">${p.color}</span>` : ''}
+                            <div class="img-wrap"><img src="${p.url}"></div>
+                            <div class="p-2 text-center small fw-bold">
+                                ${p.name}<br>
+                                <span class="text-primary">₹${p.price}</span>
+                                ${p.size ? `<div class="text-muted mt-1" style="font-size: 0.6rem">Size: ${p.size}</div>` : ''}
+                            </div>
+                        </div>
+                    </div>`;
+            });
+        }
 
         window.toggleProfileEdit = (show) => {
             document.getElementById('profileView').classList.toggle('hidden', show);
@@ -350,31 +421,27 @@
             document.getElementById('userGreeting').innerText = n ? `${n}.` : "Divine Boutique.";
         }
 
-        // DUAL LISTING (GALLERY + ADMIN INVENTORY)
         onValue(ref(db, 'products'), snap => {
-            const gallery = document.getElementById('gallery');
             const inventory = document.getElementById('inventoryContainer');
-            gallery.innerHTML = '';
             inventory.innerHTML = '';
+            currentProducts = snap.val() ? Object.entries(snap.val()).map(([id, p]) => ({ id, ...p })) : [];
             
-            if (snap.val()) {
-                Object.entries(snap.val()).forEach(([id, p]) => {
-                    // Gallery Item
-                    gallery.innerHTML += `<div class="col-6 col-md-4 col-lg-3"><div class="poshak-card shadow-sm visible" onclick="openWhatsApp('${p.name}', '${p.price}')"><div class="img-wrap"><img src="${p.url}"></div><div class="p-2 text-center small fw-bold">${p.name}<br><span class="text-primary">₹${p.price}</span></div></div></div>`;
-                    
-                    // Admin Inventory Item
-                    inventory.innerHTML += `
-                        <div class="d-flex align-items-center justify-content-between p-3 border-bottom">
-                            <div class="d-flex align-items-center gap-3">
-                                <img src="${p.url}" style="width: 50px; height: 50px; border-radius: 10px; object-fit: cover;">
-                                <div><h6 class="mb-0 fw-800">${p.name}</h6><small class="text-muted">₹${p.price}</small></div>
-                            </div>
-                            <button class="btn btn-sm btn-outline-danger border-0" onclick="deleteProduct('${id}')"><i class="bi bi-trash"></i></button>
-                        </div>`;
-                });
-            } else {
-                inventory.innerHTML = '<p class="text-center text-muted p-4">No products in boutique yet.</p>';
-            }
+            renderGallery(currentProducts);
+
+            currentProducts.forEach(p => {
+                const luxeId = p.id.slice(-4).toUpperCase();
+                inventory.innerHTML += `
+                    <div class="d-flex align-items-center justify-content-between p-3 border-bottom">
+                        <div class="d-flex align-items-center gap-3">
+                            <img src="${p.url}" style="width: 50px; height: 50px; border-radius: 10px; object-fit: cover;">
+                            <div><h6 class="mb-0 fw-800">${p.name} <small class="text-muted">(L-${luxeId})</small></h6><small class="text-muted">₹${p.price} | ${p.color || 'No Color'} | Size: ${p.size || 'N/A'}</small></div>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-sm btn-outline-primary border-0" onclick="editProduct('${p.id}')"><i class="bi bi-pencil"></i></button>
+                            <button class="btn btn-sm btn-outline-danger border-0" onclick="deleteProduct('${p.id}')"><i class="bi bi-trash"></i></button>
+                        </div>
+                    </div>`;
+            });
         });
         
         document.getElementById('loginBtn').onclick = () => signInWithPopup(auth, provider);
