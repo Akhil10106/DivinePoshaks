@@ -26,8 +26,11 @@
         .glass-nav { background: var(--glass); backdrop-filter: blur(25px); border-bottom: 1px solid rgba(0,0,0,0.03); padding: 12px 0; z-index: 1050; position: sticky; top: 0; }
         .navbar-brand { font-weight: 900; font-family: 'Playfair Display', serif; font-size: 1.6rem; background: linear-gradient(to right, var(--accent), #A29BFE); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
-        /* --- CREATIVE GREETING UI --- */
-        .creative-greeting-wrap { padding: 60px 0 30px; perspective: 1000px; }
+        .fest-countdown { background: #1A1A1A; color: white; border-radius: 25px; padding: 15px; margin-bottom: 30px; display: flex; align-items: center; justify-content: center; gap: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .cd-val { font-weight: 800; font-size: 1.2rem; color: var(--accent); display: block; line-height: 1; }
+        .cd-lbl { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6; }
+
+        .creative-greeting-wrap { padding: 40px 0 30px; perspective: 1000px; }
         .greet-text { font-family: 'Playfair Display', serif; font-weight: 700; font-style: italic; color: #666; font-size: 1.2rem; margin-bottom: -5px; opacity: 0.8; }
         .user-name-shimmer { 
             font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: clamp(2.5rem, 8vw, 4rem); 
@@ -40,7 +43,6 @@
         @keyframes textShimmer { to { background-position: 200% center; } }
         @keyframes floatY { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 
-        /* --- PREMIUM CALENDAR SECTION --- */
         .cal-container { background: white; border-radius: 40px; padding: 35px; box-shadow: 0 30px 70px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.02); max-width: 500px; margin: 0 auto; }
         .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
         .cal-nav-btn { background: var(--bg); border: none; width: 45px; height: 45px; border-radius: 15px; color: var(--gold); transition: 0.3s; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
@@ -62,14 +64,11 @@
 
         .insight-card { background: linear-gradient(135deg, #1A1A1A, #333); color: white; border-radius: 30px; padding: 25px; margin-top: 25px; box-shadow: 0 15px 40px rgba(0,0,0,0.1); }
 
-        /* --- PROFILE LUXE UI --- */
         .profile-luxe-card { background: white; border-radius: 40px; padding: 40px; box-shadow: 0 20px 60px rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.02); overflow: hidden; position: relative; }
         .profile-luxe-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 120px; background: linear-gradient(to right, #6c5ce7, #a29bfe); opacity: 0.1; }
         .prof-avatar-luxe { width: 110px; height: 110px; border-radius: 35px; border: 5px solid white; box-shadow: 0 10px 30px rgba(108, 92, 231, 0.2); position: relative; z-index: 2; margin-top: 20px; transition: 0.5s; }
         .stat-pill { background: #f8f9fd; border-radius: 20px; padding: 15px; border: 1px solid rgba(0,0,0,0.02); }
-        .action-tile { background: white; border-radius: 25px; padding: 20px; border: 1px solid rgba(0,0,0,0.03); display: flex; align-items: center; gap: 15px; cursor: pointer; transition: 0.3s; }
 
-        /* --- GLOBAL --- */
         .poshak-card { background: white; border-radius: var(--radius-ultra); border: none; overflow: hidden; transition: var(--transition); height: 100%; position: relative; box-shadow: 0 10px 40px rgba(0,0,0,0.02); opacity: 0; cursor: pointer; }
         .poshak-card.visible { opacity: 1; animation: fadeInUp 0.6s var(--transition); }
         .img-wrap { aspect-ratio: 1 / 1.15; overflow: hidden; background: #f0f2f5; }
@@ -100,6 +99,14 @@
 
     <main id="sectionShop" class="section-container container pb-5 mb-5">
         <header class="creative-greeting-wrap text-center">
+            <div id="countdownBox" class="fest-countdown animate__animated animate__fadeIn">
+                <div class="text-start ms-2"><small class="fw-bold d-block text-gold">NEAREST FESTIVAL</small><span id="cdEventName" class="small fw-800 text-white">...</span></div>
+                <div class="d-flex gap-3 ms-auto">
+                    <div class="text-center"><span class="cd-val" id="cdDays">00</span><span class="cd-lbl">Days</span></div>
+                    <div class="text-center"><span class="cd-val" id="cdHrs">00</span><span class="cd-lbl">Hrs</span></div>
+                    <div class="text-center"><span class="cd-val" id="cdMin">00</span><span class="cd-lbl">Min</span></div>
+                </div>
+            </div>
             <p id="timeGreeting" class="greet-text">Radhe Radhe!</p>
             <h1 id="userGreeting" class="user-name-shimmer">Divine Collections.</h1>
         </header>
@@ -111,7 +118,6 @@
             <span class="badge bg-accent-soft text-accent rounded-pill px-3 py-2 mb-3 fw-800">Hindu Almanac 2026</span>
             <h1 class="fw-900 display-5">Divine Panchang</h1>
         </div>
-
         <div class="cal-container animate__animated animate__zoomIn">
             <div class="cal-header">
                 <button class="cal-nav-btn" onclick="changeMonth(-1)"><i class="bi bi-chevron-left"></i></button>
@@ -120,10 +126,9 @@
             </div>
             <div class="cal-grid" id="calGrid">
                 <div class="cal-day-label">SUN</div><div class="cal-day-label">MON</div><div class="cal-day-label">TUE</div><div class="cal-day-label">WED</div><div class="cal-day-label">THU</div><div class="cal-day-label">FRI</div><div class="cal-day-label">SAT</div>
-                </div>
+            </div>
         </div>
-
-        <div class="max-width: 500px; margin: 0 auto;">
+        <div style="max-width: 500px; margin: 0 auto;">
             <div class="insight-card animate__animated animate__fadeInUp">
                 <h6 class="text-uppercase small fw-800 opacity-50 mb-2">Sacred Day Insight</h6>
                 <h4 id="insightTitle" class="fw-900 mb-1">Select a Date</h4>
@@ -144,6 +149,12 @@
                 </div>
             </div>
         </div>
+        <div class="bg-white p-4 rounded-5 shadow-sm mt-3" onclick="toggleCollapse('adminInventoryList')">
+            <h5 class="fw-900 mb-0">Manage Inventory <i class="bi bi-chevron-down float-end"></i></h5>
+            <div id="adminInventoryList" class="mt-4 hidden" onclick="event.stopPropagation()">
+                <div id="inventoryContainer"></div>
+            </div>
+        </div>
     </main>
 
     <main id="sectionProfile" class="section-container container hidden py-5 mb-5">
@@ -151,10 +162,18 @@
             <div class="row align-items-center">
                 <div class="col-md-4 text-center"><img src="" id="profImg" class="prof-avatar-luxe"></div>
                 <div class="col-md-8 text-center text-md-start mt-4 mt-md-0">
-                    <div id="profileStaticView">
+                    <div id="profileView">
                         <span class="badge rounded-pill bg-accent-soft text-accent px-3 py-2 mb-2">Premium Devotee</span>
                         <h1 id="profName" class="fw-900 display-6 mb-1">Devotee</h1>
                         <p id="profEmail" class="text-muted mb-3 small"></p>
+                        <button class="btn btn-sm btn-light rounded-pill px-3" onclick="toggleProfileEdit(true)"><i class="bi bi-pencil-square me-2"></i>Edit Profile</button>
+                    </div>
+                    <div id="profileEdit" class="hidden">
+                        <input type="text" id="editName" class="form-control rounded-4 mb-2" placeholder="Your Name">
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-dark rounded-pill px-4" onclick="saveProfile()">Save</button>
+                            <button class="btn btn-light rounded-pill px-4" onclick="toggleProfileEdit(false)">Cancel</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -199,85 +218,104 @@
             window.open(`https://wa.me/${whatsappNumber}?text=${msg}`, '_blank');
         };
 
-        // --- PRECISE CALENDAR DATA 2026 ---
-        const sacredDays = {
-            "2-15": "Maha Shivaratri (The Great Night of Shiva)",
-            "3-4": "Holi (Festival of Colors)",
-            "3-27": "Rama Navami (Birth of Lord Rama)",
-            "4-2": "Hanuman Jayanti",
-            "8-28": "Raksha Bandhan",
-            "9-4": "Krishna Janmashtami (Birth of Lord Krishna)",
-            "10-21": "Vijayadashami (Dussehra)",
-            "11-8": "Diwali (Festival of Lights)"
+        const sacredDays = { "2-15": "Maha Shivaratri", "3-4": "Holi", "3-27": "Rama Navami", "4-2": "Hanuman Jayanti", "8-28": "Raksha Bandhan", "9-4": "Krishna Janmashtami", "10-21": "Vijayadashami", "11-8": "Diwali" };
+
+        function runTimer() {
+            const now = new Date(); const year = 2026; let target = null; let eventName = "";
+            for (const [key, name] of Object.entries(sacredDays)) {
+                const [m, d] = key.split('-'); const eventDate = new Date(year, m - 1, d);
+                if (eventDate > now) { if (!target || eventDate < target) { target = eventDate; eventName = name; } }
+            }
+            if (!target) return;
+            document.getElementById('cdEventName').innerText = eventName;
+            setInterval(() => {
+                const diff = target.getTime() - new Date().getTime();
+                document.getElementById('cdDays').innerText = Math.floor(diff / (1000 * 60 * 60 * 24)).toString().padStart(2, '0');
+                document.getElementById('cdHrs').innerText = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)).toString().padStart(2, '0');
+                document.getElementById('cdMin').innerText = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
+            }, 1000);
+        }
+        runTimer();
+
+        // FIXED PUBLISHING LOGIC
+        document.getElementById('uploadBtn').onclick = () => {
+            const file = document.getElementById('pImg').files[0];
+            const name = document.getElementById('pName').value;
+            const price = document.getElementById('pPrice').value;
+
+            if (!file || !name || !price) return alert("Please fill all details and select an image.");
+
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => {
+                push(ref(db, 'products'), { name, price, url: reader.result })
+                .then(() => {
+                    alert("Poshak Published Successfully!");
+                    document.getElementById('pName').value = '';
+                    document.getElementById('pPrice').value = '';
+                    document.getElementById('pImg').value = '';
+                })
+                .catch(err => alert("Error: " + err.message));
+            };
         };
 
-        let currentViewMonth = new Date().getMonth();
-        let currentViewYear = 2026;
+        window.deleteProduct = (id) => {
+            if(confirm("Remove this Poshak from Boutique?")) remove(ref(db, `products/${id}`));
+        };
 
+        window.toggleProfileEdit = (show) => {
+            document.getElementById('profileView').classList.toggle('hidden', show);
+            document.getElementById('profileEdit').classList.toggle('hidden', !show);
+            if(show) document.getElementById('editName').value = document.getElementById('profName').innerText;
+        };
+
+        window.saveProfile = async () => {
+            const user = auth.currentUser;
+            const newName = document.getElementById('editName').value;
+            if(user && newName) {
+                await update(ref(db, `users/${user.uid}`), { name: newName });
+                toggleProfileEdit(false);
+            }
+        };
+
+        window.toggleCollapse = (id) => document.getElementById(id).classList.toggle('hidden');
+
+        let vMonth = new Date().getMonth(); let vYear = 2026;
         function renderCal() {
             const grid = document.getElementById('calGrid');
             const monthText = document.getElementById('monthDisplay');
             const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-            
-            monthText.innerText = monthNames[currentViewMonth];
-            
-            // Clear previous dates but keep labels
+            monthText.innerText = monthNames[vMonth];
             const labels = Array.from(grid.querySelectorAll('.cal-day-label'));
-            grid.innerHTML = '';
-            labels.forEach(l => grid.appendChild(l));
-
-            const firstDay = new Date(currentViewYear, currentViewMonth, 1).getDay();
-            const daysInMonth = new Date(currentViewYear, currentViewMonth + 1, 0).getDate();
-
+            grid.innerHTML = ''; labels.forEach(l => grid.appendChild(l));
+            const firstDay = new Date(vYear, vMonth, 1).getDay();
+            const daysInMonth = new Date(vYear, vMonth + 1, 0).getDate();
             for (let i = 0; i < firstDay; i++) grid.appendChild(document.createElement('div'));
-
             for (let d = 1; d <= daysInMonth; d++) {
-                const dateDiv = document.createElement('div');
-                dateDiv.className = 'cal-date';
-                dateDiv.innerText = d;
-
-                const dateKey = `${currentViewMonth + 1}-${d}`;
-                const festival = sacredDays[dateKey];
-                
-                if (festival) {
-                    dateDiv.classList.add('sacred');
-                    dateDiv.innerHTML += `<div class="fest-indicator"></div>`;
-                }
-
-                const today = new Date();
-                if (today.getDate() == d && today.getMonth() == currentViewMonth && today.getFullYear() == currentViewYear) {
-                    dateDiv.classList.add('today');
-                }
-
+                const dateDiv = document.createElement('div'); dateDiv.className = 'cal-date'; dateDiv.innerText = d;
+                const dateKey = `${vMonth + 1}-${d}`; const festival = sacredDays[dateKey];
+                if (festival) { dateDiv.classList.add('sacred'); dateDiv.innerHTML += `<div class="fest-indicator"></div>`; }
+                if (new Date().toDateString() === new Date(vYear, vMonth, d).toDateString()) dateDiv.classList.add('today');
                 dateDiv.onclick = () => {
                     document.querySelectorAll('.cal-date').forEach(el => el.classList.remove('selected'));
                     dateDiv.classList.add('selected');
-                    updateInsight(d, currentViewMonth, festival);
+                    updateInsight(d, vMonth, festival);
                 };
-
                 grid.appendChild(dateDiv);
             }
         }
-
-        window.changeMonth = (dir) => {
-            currentViewMonth += dir;
-            if (currentViewMonth < 0) currentViewMonth = 11;
-            if (currentViewMonth > 11) currentViewMonth = 0;
-            renderCal();
-        };
-
+        window.changeMonth = (dir) => { vMonth += dir; if (vMonth < 0) vMonth = 11; if (vMonth > 11) vMonth = 0; renderCal(); };
         function updateInsight(day, month, fest) {
-            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-            document.getElementById('insightTitle').innerText = `${day} ${monthNames[month]}`;
-            document.getElementById('insightDesc').innerText = fest ? `Sacred Event: ${fest}` : "An auspicious day for Divine Devotion. No major festivals recorded.";
+            const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            document.getElementById('insightTitle').innerText = `${day} ${months[month]}`;
+            document.getElementById('insightDesc').innerText = fest ? `Sacred Event: ${fest}` : "An auspicious day for Divine Devotion.";
         }
-        
         renderCal();
 
-        // --- CORE NAVIGATION (PRESERVED) ---
         window.showSection = (n) => {
             document.querySelectorAll('.section-container').forEach(s => s.classList.add('hidden'));
-            document.getElementById(`section${n.charAt(0).toUpperCase() + n.slice(1)}`).classList.remove('hidden');
+            const target = document.getElementById(`section${n.charAt(0).toUpperCase() + n.slice(1)}`);
+            if(target) target.classList.remove('hidden');
             document.querySelectorAll('.hub-btn').forEach(b => b.classList.remove('active'));
             const b = document.getElementById(`hub${n.charAt(0).toUpperCase() + n.slice(1)}`);
             if(b) b.classList.add('active');
@@ -312,11 +350,31 @@
             document.getElementById('userGreeting').innerText = n ? `${n}.` : "Divine Boutique.";
         }
 
+        // DUAL LISTING (GALLERY + ADMIN INVENTORY)
         onValue(ref(db, 'products'), snap => {
-            const gallery = document.getElementById('gallery'); gallery.innerHTML = '';
-            if (snap.val()) Object.entries(snap.val()).forEach(([id, p]) => {
-                gallery.innerHTML += `<div class="col-6 col-md-4 col-lg-3"><div class="poshak-card shadow-sm visible" onclick="openWhatsApp('${p.name}', '${p.price}')"><div class="img-wrap"><img src="${p.url}"></div><div class="p-2 text-center small fw-bold">${p.name}<br><span class="text-primary">₹${p.price}</span></div></div></div>`;
-            });
+            const gallery = document.getElementById('gallery');
+            const inventory = document.getElementById('inventoryContainer');
+            gallery.innerHTML = '';
+            inventory.innerHTML = '';
+            
+            if (snap.val()) {
+                Object.entries(snap.val()).forEach(([id, p]) => {
+                    // Gallery Item
+                    gallery.innerHTML += `<div class="col-6 col-md-4 col-lg-3"><div class="poshak-card shadow-sm visible" onclick="openWhatsApp('${p.name}', '${p.price}')"><div class="img-wrap"><img src="${p.url}"></div><div class="p-2 text-center small fw-bold">${p.name}<br><span class="text-primary">₹${p.price}</span></div></div></div>`;
+                    
+                    // Admin Inventory Item
+                    inventory.innerHTML += `
+                        <div class="d-flex align-items-center justify-content-between p-3 border-bottom">
+                            <div class="d-flex align-items-center gap-3">
+                                <img src="${p.url}" style="width: 50px; height: 50px; border-radius: 10px; object-fit: cover;">
+                                <div><h6 class="mb-0 fw-800">${p.name}</h6><small class="text-muted">₹${p.price}</small></div>
+                            </div>
+                            <button class="btn btn-sm btn-outline-danger border-0" onclick="deleteProduct('${id}')"><i class="bi bi-trash"></i></button>
+                        </div>`;
+                });
+            } else {
+                inventory.innerHTML = '<p class="text-center text-muted p-4">No products in boutique yet.</p>';
+            }
         });
         
         document.getElementById('loginBtn').onclick = () => signInWithPopup(auth, provider);
